@@ -1,7 +1,7 @@
 import { access, readFile } from 'fs/promises';
 import { FileSystemAdapter, requestUrl } from 'obsidian';
 import { join, normalize } from 'path';
-import mimes from 'mime/lite';
+import mimes from 'mime';
 
 const prefix = 'app://local';
 
@@ -19,8 +19,8 @@ async function readFileAsBase64(path: string): Promise<string | null> {
 }
 
 async function convertPathToLocalLink(path: string): Promise<string | null> {
-  if (await app.vault.adapter.exists(path)) {
-    return app.vault.adapter.getResourcePath(path);
+  if (await this.app.vault.adapter.exists(path)) {
+    return this.app.vault.adapter.getResourcePath(path);
   }
 
   try {
@@ -34,7 +34,7 @@ async function convertPathToLocalLink(path: string): Promise<string | null> {
 export async function convertToBase64(path: string): Promise<string | null> {
   const mime = mimes.getType(path);
   if (!mime) return null;
-  if (await app.vault.adapter.exists(path)) {
+  if (await this.app.vault.adapter.exists(path)) {
     const basePath = (
       this.app.vault.adapter as FileSystemAdapter
     ).getBasePath();

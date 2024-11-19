@@ -57,7 +57,7 @@ export async function exportSlide(
       exportDir,
       file.basename,
     )}.${ext}" --engine ${tmpEnginePath} -- "${tmpPath}"`;
-  } catch (e) {
+  } catch {
     cmd = `npx -y @marp-team/marp-cli@latest --stdin false --allow-local-files --bespoke.transition -o "${join(
       exportDir,
       file.basename,

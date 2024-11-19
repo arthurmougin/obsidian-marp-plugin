@@ -103,7 +103,7 @@ export class PreviewView extends ItemView implements PreviewViewState {
     return super.setState(state, result);
   }
 
-  getState(): PreviewViewState {
+  getState(): Record<string,unknown> {
     return {
       file: this.file,
     };
