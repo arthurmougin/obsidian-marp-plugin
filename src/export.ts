@@ -5,6 +5,7 @@ import { convertToBase64 } from './convertImage';
 import { join, normalize } from 'path';
 import fixPath from 'fix-path';
 import { getEngine } from './engine';
+import { marpConfig } from './marp';
 
 const imgPathReg = /!\[[^\]]*\]\(([^)]+)\)/g;
 
@@ -23,6 +24,7 @@ export async function exportSlide(
   const filePath = normalize(join(basePath, file.path));
   const tmpPath = join(exportDir, `${file.basename}.tmp`);
   const tmpEnginePath = join(exportDir, 'engine.js');
+  const tmpconfigPath = join(exportDir, 'package-marp.json');
 
   let fileContent = await readFile(filePath, 'utf-8');
 
@@ -46,22 +48,25 @@ export async function exportSlide(
   try {
     await writeFile(tmpPath, fileContent);
     await writeFile(tmpEnginePath, getEngine());
+    await writeFile(tmpconfigPath, JSON.stringify({options:marpConfig}));
+
   } catch (e) {
     console.error(e);
   }
 
+
   let cmd: string;
   try {
     await access(themeDir);
-    cmd = `npx -y @marp-team/marp-cli@latest --bespoke.transition --stdin false --allow-local-files --theme-set "${themeDir}" -o "${join(
+    cmd = `npx -y @marp-team/marp-cli@latest  --bespoke.transition --stdin false --allow-local-files --theme-set "${themeDir}" -o "${join(
       exportDir,
       file.basename,
-    )}.${ext}" --engine ${tmpEnginePath} -- "${tmpPath}"`;
+    )}.${ext}" --engine ${tmpEnginePath}  --config ${tmpconfigPath} -- "${tmpPath}"`;
   } catch {
     cmd = `npx -y @marp-team/marp-cli@latest --stdin false --allow-local-files --bespoke.transition -o "${join(
       exportDir,
       file.basename,
-    )}.${ext}" --engine ${tmpEnginePath} -- "${tmpPath}"`;
+    )}.${ext}" --engine ${tmpEnginePath}  --config ${tmpconfigPath} -- "${tmpPath}"`;
   }
 
   fixPath();
@@ -70,5 +75,8 @@ export async function exportSlide(
     new Notice('Exported successfully', 20000);
     rm(tmpPath);
     rm(tmpEnginePath);
+    rm(tmpconfigPath);
   });
 }
+
+//npx -y @marp-team/marp-cli@latest  --bespoke.transition --stdin false --allow-local-files --theme-set "${themeDir}" -o "Téléchargements/test.html" --engine ${tmpEnginePath} -- "${tmpPath}  -config ${tmpconfigPath}
